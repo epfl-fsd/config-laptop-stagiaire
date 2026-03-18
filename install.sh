@@ -76,5 +76,3 @@ docker run --rm -d \
   --restart always \
   --name stage-challenge \
   ghcr.io/lvenries/stage_challenge:1.0.0
-
-reboot
