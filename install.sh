@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Source: https://gist.github.com/ponsfrilus/970db330c857285e40bb04954e554965
-# Usage: bash <(curl -s https://gist.githubusercontent.com/ponsfrilus/970db330c857285e40bb04954e554965/raw/install.sh)
+# Usage: 
+# - bash <(curl -s https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/refs/heads/main/install.sh)
+# - wget -O - https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/refs/heads/main/install.sh | bash
+# Note: use $(cat /proc/sys/kernel/random/uuid | cut -d'-' -f1) to bypass GitHub cache
 
 echo "Installation script for trainee latptop"
 
@@ -10,11 +13,22 @@ apt update && apt upgrade -y
 # Ensure Wifi is on eduroam
 nmcli d wifi connect eduroam
 
+# Codium archive repo
+wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg \
+  | gpg --dearmor \
+  | sudo dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
+echo -e 'Types: deb\nURIs: https://download.vscodium.com/debs\nSuites: vscodium\nComponents: main\nArchitectures: amd64 arm64\nSigned-by: /usr/share/keyrings/vscodium-archive-keyring.gpg' \
+  | sudo tee /etc/apt/sources.list.d/vscodium.sources
+
+# Re-update for new repos
+apt update
+
 # Install usefull tools
 apt install -y \
+  bash-completion \
   codium \
+  ca-certificates \
   curl \
-  docker \
   git \
   iputils-ping \
   sl \
@@ -23,9 +37,24 @@ apt install -y \
   vlc \
   zsh
 
+# Install Docker
+# See https://docs.docker.com/engine/install/ubuntu/
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh ./get-docker.sh
+
+# Docker post-install (https://docs.docker.com/engine/install/linux-postinstall/)
+groupadd docker 2>/dev/null || true
+usermod -aG docker administrator
+newgrp docker
+
+# systemctl enable docker.service
+# systemctl enable containerd.service
+ 
 # Add a "stage" user
-useradd -m -p "PleaseLetMeIn" "stage"
+useradd -m -p PleaseLetMeIn stage || true
+usermod -aG docker stage
 
 # Ensure the challenge is running
 # See https://github.com/lvenries/stage_challenge
-docker run -d -p 80:80 -p 2222:22 --name stage-challenge ghcr.io/lvenries/stage_challenge:1.0.0 --restart
+docker rm stage-challenge || true
+docker run --rm -d -p 80:80 -p 2222:22 --name stage-challenge ghcr.io/lvenries/stage_challenge:1.0.0
