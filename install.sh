@@ -57,15 +57,8 @@ fi
 echo "$NEW_USER:$NEW_PASSWORD" | sudo chpasswd
 sudo usermod -aG docker "$NEW_USER"
 
-sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
-# setup autologin with the new user
-cat <<EOF | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf > /dev/null
-[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --autologin $NEW_USER --noclear %I \$TERM
-EOF
-
-sudo systemctl daemon-reload
+sudo sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' /etc/gdm3/custom.conf
+sudo sed -i "s/^.*AutomaticLogin = .*/AutomaticLogin = $NEW_USER/" /etc/gdm3/custom.conf
 
 # Ensure the challenge is running
 # See https://github.com/lvenries/stage_challenge
