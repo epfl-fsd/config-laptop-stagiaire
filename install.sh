@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Source: https://gist.github.com/ponsfrilus/970db330c857285e40bb04954e554965
-# Usage:
-# - bash <(curl -s https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/refs/heads/main/install.sh)
-# - wget -O - https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/refs/heads/main/install.sh | bash
+# Usage (as root):
+# - bash <(curl -s https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/main/install.sh)
+# - wget -O - https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/main/install.sh | bash
 # Note: use $(cat /proc/sys/kernel/random/uuid | cut -d'-' -f1) to bypass GitHub cache
 NEW_USER="stage"
 # set passwore more than 8
