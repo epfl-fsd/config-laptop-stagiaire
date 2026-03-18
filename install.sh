@@ -10,3 +10,16 @@ apt update && apt upgrade -y
 # Ensure Wifi is on eduroam
 nmcli d wifi connect eduroam
 
+# Install usefull tools
+apt install -y \
+  codium \
+  curl \
+  docker \
+  git \
+  iputils-ping \
+  sl \
+  tmux \
+  vim \
+  vlc \
+  zsh
+
