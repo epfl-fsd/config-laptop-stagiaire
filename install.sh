@@ -12,8 +12,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # User account data
-NEW_USER="stage"
-NEW_PASSWORD="superpassword" # 8 chars min
+CLS_NEW_USER=${CLS_NEW_USER:-"stage"}
+CLS_NEW_PASSWORD=${CLS_NEW_PASSWORD:-"superpassword"} # 8 chars min
 
 echo "Installation script for trainee latptop"
 
@@ -71,19 +71,19 @@ groupadd docker 2>/dev/null || true
 usermod -aG docker administrator
 
 # Add a new user
-if ! id "$NEW_USER" &>/dev/null; then
-  useradd -m -s /bin/bash "$NEW_USER"
+if ! id "$CLS_NEW_USER" &>/dev/null; then
+  useradd -m -s /bin/bash "$CLS_NEW_USER"
 fi
 # Change its password
-echo "$NEW_USER:$NEW_PASSWORD" | chpasswd
+echo "$CLS_NEW_USER:$CLS_NEW_PASSWORD" | chpasswd
 # Change its shell
-usermod -s /bin/bash "$NEW_USER"
+usermod -s /bin/bash "$CLS_NEW_USER"
 # Add it to the docker group
-usermod -aG docker "$NEW_USER"
+usermod -aG docker "$CLS_NEW_USER"
 
 # Set automatic login to the new user
 sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' /etc/gdm3/custom.conf
-sed -i "s/^.*AutomaticLogin = .*/AutomaticLogin = $NEW_USER/" /etc/gdm3/custom.conf
+sed -i "s/^.*AutomaticLogin = .*/AutomaticLogin = $CLS_NEW_USER/" /etc/gdm3/custom.conf
 
 # Check if stage-challenge host exist, else append entry
 grep -q "stage-challenge.epfl.ch" /etc/hosts || \
@@ -100,4 +100,6 @@ docker run -d \
   ghcr.io/lvenries/stage_challenge:1.0.0
 
 # Ask to reboot the machine
-read -r -p "Reboot the machine? [Y/n] " a; [[ ${a:-Y} =~ ^[Yy] ]] && reboot
+read -p "Reboot the machine now? (y/n) " -n 1 -r < /dev/tty
+echo
+[[ $REPLY =~ ^[Yy]$ ]] && reboot
