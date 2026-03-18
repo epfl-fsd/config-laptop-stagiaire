@@ -131,6 +131,19 @@ Name=Firefox Tabs
 EOF
 chown -R $CLS_NEW_USER:$CLS_NEW_USER "$CLS_USER_HOME/.config"
 
+################################################################################
+# Background management
+################################################################################
+# https://unsplash.com/photos/gray-concrete-building-near-green-grass-field-during-daytime-TkNFQiuZJ4Q
+wget -O /home/${CLS_NEW_USER}/Pictures/med01.jpg https://unsplash.com/photos/TkNFQiuZJ4Q/download
+# https://unsplash.com/photos/a-building-with-windows-jL78MPkwN3M
+wget -O /home/${CLS_NEW_USER}/Pictures/med02.jpg https://unsplash.com/photos/jL78MPkwN3M/download
+
+RAND=$(printf "%02d" $((RANDOM % 2 + 1)))
+sudo -u ${CLS_NEW_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CLS_NEW_USER})/bus" \
+gsettings set org.gnome.desktop.background picture-uri "file:///home/${CLS_NEW_USER}/Pictures/med${RAND}.jpg"
+
+################################################################################
 # Ask to reboot the machine
 read -p "Reboot the machine now? (y/n) " -n 1 -r < /dev/tty
 echo
