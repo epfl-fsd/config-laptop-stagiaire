@@ -23,3 +23,5 @@ apt install -y \
   vlc \
   zsh
 
+# Add a "stage" user
+useradd -m -p "PleaseLetMeIn" "stage"
