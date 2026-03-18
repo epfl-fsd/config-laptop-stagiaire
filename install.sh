@@ -57,7 +57,7 @@ fi
 echo "$NEW_USER:$NEW_PASSWORD" | chpasswd
 usermod -aG docker "$NEW_USER"
 
-mkdir -p /etc/systemd/system/getty@tty1.service.d/
+sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
 # setup autologin with the new user
 cat <<EOF > /etc/systemd/system/getty@tty1.service.d/override.conf
 [Service]
@@ -65,7 +65,7 @@ ExecStart=
 ExecStart=-/sbin/agetty --autologin $NEW_USER --noclear %I \$TERM
 EOF
 
-systemctl daemon-reload
+sudo systemctl daemon-reload
 
 # Ensure the challenge is running
 # See https://github.com/lvenries/stage_challenge
