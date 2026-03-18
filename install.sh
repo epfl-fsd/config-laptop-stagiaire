@@ -41,6 +41,7 @@ apt install -y \
   curl \
   git \
   iputils-ping \
+  openssh-server \
   sl \
   tmux \
   vim \
@@ -50,6 +51,12 @@ apt install -y \
 # Remove the "Welcome to Ubuntu"
 apt remove \
   gnome-initial-setup;
+
+# Enable SSH
+systemctl enable ssh --now
+
+# Add some SSH user
+ssh-import-id gh:ponsfrilus gh:lvenries gh:evinne8 gh:antoinefabr
 
 # Install Docker (https://docs.docker.com/engine/install/ubuntu/)
 if docker ps >/dev/null 2>&1; then
