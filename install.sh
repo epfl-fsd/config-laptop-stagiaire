@@ -52,14 +52,14 @@ newgrp docker
 # systemctl enable containerd.service
 # Add a new user
 if ! id "$NEW_USER" &>/dev/null; then
-    useradd -m -s /bin/bash "$NEW_USER"
+    sudo useradd -m -s /bin/bash "$NEW_USER"
 fi
-echo "$NEW_USER:$NEW_PASSWORD" | chpasswd
-usermod -aG docker "$NEW_USER"
+sudo echo "$NEW_USER:$NEW_PASSWORD" | chpasswd
+sudo usermod -aG docker "$NEW_USER"
 
 sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
 # setup autologin with the new user
-cat <<EOF > /etc/systemd/system/getty@tty1.service.d/override.conf
+sudo cat <<EOF > /etc/systemd/system/getty@tty1.service.d/override.conf
 [Service]
 ExecStart=
 ExecStart=-/sbin/agetty --autologin $NEW_USER --noclear %I \$TERM
