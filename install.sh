@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Source: https://gist.github.com/ponsfrilus/970db330c857285e40bb04954e554965
-# Usage: 
+# Usage:
 # - bash <(curl -s https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/refs/heads/main/install.sh)
 # - wget -O - https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/refs/heads/main/install.sh | bash
 # Note: use $(cat /proc/sys/kernel/random/uuid | cut -d'-' -f1) to bypass GitHub cache
-
+NEW_USER="stage"
+NEW_PASSWORD=" "
 echo "Installation script for trainee latptop"
 
 # Update everything
@@ -49,10 +50,22 @@ newgrp docker
 
 # systemctl enable docker.service
 # systemctl enable containerd.service
- 
-# Add a "stage" user
-useradd -m -p PleaseLetMeIn stage || true
-usermod -aG docker stage
+# Add a new user
+if ! id "$NEW_USER" &>/dev/null; then
+    useradd -m -s /bin/bash "$NEW_USER"
+fi
+echo "$NEW_USER:$NEW_PASSWORD" | chpasswd
+usermod -aG docker "$NEW_USER"
+
+mkdir -p /etc/systemd/system/getty@tty1.service.d/
+# setup autologin with the new user
+cat <<EOF > /etc/systemd/system/getty@tty1.service.d/override.conf
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin $NEW_USER --noclear %I \$TERM
+EOF
+
+systemctl daemon-reload
 
 # Ensure the challenge is running
 # See https://github.com/lvenries/stage_challenge
@@ -63,3 +76,5 @@ docker run --rm -d \
   --restart always \
   --name stage-challenge \
   ghcr.io/lvenries/stage_challenge:1.0.0
+
+reboot
