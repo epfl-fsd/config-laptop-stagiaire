@@ -7,3 +7,6 @@ echo "Installation script for trainee latptop"
 # Update everything
 apt update && apt upgrade -y
 
+# Ensure Wifi is on eduroam
+nmcli d wifi connect eduroam
+
