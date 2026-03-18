@@ -99,6 +99,20 @@ docker run -d \
   --name stage-challenge \
   ghcr.io/lvenries/stage_challenge:1.0.0
 
+# Auto-launch Firefox tabs on stage session
+CLS_USER_HOME=$(eval echo ~$CLS_NEW_USER)
+mkdir -p "$CLS_USER_HOME/.config/autostart"
+cat > "$CLS_USER_HOME/.config/autostart/firefox-tabs.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Exec=bash -c "sleep 8 && firefox --new-window http://stage-challenge.epfl.ch --new-tab https://www.epfl.ch"
+Hidden=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+Name=Firefox Tabs
+EOF
+chown -R $CLS_NEW_USER:$CLS_NEW_USER "$CLS_USER_HOME/.config"
+
 # Ask to reboot the machine
 read -p "Reboot the machine now? (y/n) " -n 1 -r < /dev/tty
 echo
