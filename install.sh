@@ -45,8 +45,8 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sh ./get-docker.sh
 
 # Docker post-install (https://docs.docker.com/engine/install/linux-postinstall/)
-groupadd docker 2>/dev/null || true
-usermod -aG docker administrator
+sudo groupadd docker 2>/dev/null || true
+sudo usermod -aG docker administrator
 
 # systemctl enable docker.service
 # systemctl enable containerd.service
@@ -76,3 +76,5 @@ sudo docker run -d \
   --restart always \
   --name stage-challenge \
   ghcr.io/lvenries/stage_challenge:1.0.0
+
+reboot
