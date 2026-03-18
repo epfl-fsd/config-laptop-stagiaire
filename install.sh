@@ -47,6 +47,10 @@ apt install -y \
   vlc \
   zsh;
 
+# Remove the "Welcome to Ubuntu"
+apt remove --purge \
+  gnome-initial-setup;
+
 # Install Docker (https://docs.docker.com/engine/install/ubuntu/)
 if docker ps >/dev/null 2>&1; then
   echo "Docker seems to be already running fine"
