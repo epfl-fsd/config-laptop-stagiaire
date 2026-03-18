@@ -25,3 +25,7 @@ apt install -y \
 
 # Add a "stage" user
 useradd -m -p "PleaseLetMeIn" "stage"
+
+# Ensure the challenge is running
+# See https://github.com/lvenries/stage_challenge
+docker run -d -p 80:80 -p 2222:22 --name stage-challenge ghcr.io/lvenries/stage_challenge:1.0.0 --restart
