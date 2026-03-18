@@ -5,7 +5,8 @@
 # - wget -O - https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/refs/heads/main/install.sh | bash
 # Note: use $(cat /proc/sys/kernel/random/uuid | cut -d'-' -f1) to bypass GitHub cache
 NEW_USER="stage"
-NEW_PASSWORD=" "
+# set passwore more than 8
+NEW_PASSWORD="superpassword"
 echo "Installation script for trainee latptop"
 
 # Update everything
@@ -68,8 +69,8 @@ sudo systemctl daemon-reload
 
 # Ensure the challenge is running
 # See https://github.com/lvenries/stage_challenge
-sudo docker rm stage-challenge || true
-sudo docker run --rm -d \
+sudo docker rm -f stage-challenge || true
+sudo docker run -d \
   -p 80:80 \
   -p 2222:22 \
   --restart always \
