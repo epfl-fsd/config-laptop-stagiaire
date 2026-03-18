@@ -57,4 +57,9 @@ usermod -aG docker stage
 # Ensure the challenge is running
 # See https://github.com/lvenries/stage_challenge
 docker rm stage-challenge || true
-docker run --rm -d -p 80:80 -p 2222:22 --name stage-challenge ghcr.io/lvenries/stage_challenge:1.0.0
+docker run --rm -d \
+  -p 80:80 \
+  -p 2222:22 \
+  --restart always \
+  --name stage-challenge \
+  ghcr.io/lvenries/stage_challenge:1.0.0
