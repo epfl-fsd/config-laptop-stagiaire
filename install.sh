@@ -85,6 +85,10 @@ usermod -aG docker "$NEW_USER"
 sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' /etc/gdm3/custom.conf
 sed -i "s/^.*AutomaticLogin = .*/AutomaticLogin = $NEW_USER/" /etc/gdm3/custom.conf
 
+# Check if stage-challenge host exist, else append entry
+grep -q "stage-challenge.epfl.ch" /etc/hosts || \
+sed -i "s/^127.0.0.1.*/& stage-challenge.epfl.ch/" /etc/hosts
+
 # Ensure the challenge is running
 # See https://github.com/lvenries/stage_challenge
 docker rm -f stage-challenge || true
