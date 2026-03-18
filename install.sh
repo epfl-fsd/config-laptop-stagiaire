@@ -52,7 +52,7 @@ sudo usermod -aG docker administrator
 # systemctl enable containerd.service
 # Add a new user
 if ! id "$NEW_USER" &>/dev/null; then
-    sudo useradd -m -s /bin/bash "$NEW_USER"
+  sudo useradd -m -s /bin/bash "$NEW_USER"
 fi
 echo "$NEW_USER:$NEW_PASSWORD" | sudo chpasswd
 sudo usermod -aG docker "$NEW_USER"
