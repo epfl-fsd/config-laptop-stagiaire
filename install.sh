@@ -48,7 +48,7 @@ apt install -y \
   zsh;
 
 # Remove the "Welcome to Ubuntu"
-apt remove --purge \
+apt remove \
   gnome-initial-setup;
 
 # Install Docker (https://docs.docker.com/engine/install/ubuntu/)
@@ -83,4 +83,5 @@ docker run -d \
   --name stage-challenge \
   ghcr.io/lvenries/stage_challenge:1.0.0
 
-reboot
+# Ask to reboot the machine
+read -r -p "Reboot the machine? [Y/n] " a; [[ ${a:-Y} =~ ^[Yy] ]] && reboot
