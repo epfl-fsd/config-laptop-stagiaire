@@ -46,7 +46,6 @@ sh ./get-docker.sh
 # Docker post-install (https://docs.docker.com/engine/install/linux-postinstall/)
 groupadd docker 2>/dev/null || true
 usermod -aG docker administrator
-newgrp docker
 
 # systemctl enable docker.service
 # systemctl enable containerd.service
@@ -54,12 +53,12 @@ newgrp docker
 if ! id "$NEW_USER" &>/dev/null; then
     sudo useradd -m -s /bin/bash "$NEW_USER"
 fi
-sudo echo "$NEW_USER:$NEW_PASSWORD" | chpasswd
+echo "$NEW_USER:$NEW_PASSWORD" | sudo chpasswd
 sudo usermod -aG docker "$NEW_USER"
 
 sudo mkdir -p /etc/systemd/system/getty@tty1.service.d/
 # setup autologin with the new user
-sudo cat <<EOF > /etc/systemd/system/getty@tty1.service.d/override.conf
+cat <<EOF | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf > /dev/null
 [Service]
 ExecStart=
 ExecStart=-/sbin/agetty --autologin $NEW_USER --noclear %I \$TERM
@@ -69,8 +68,8 @@ sudo systemctl daemon-reload
 
 # Ensure the challenge is running
 # See https://github.com/lvenries/stage_challenge
-docker rm stage-challenge || true
-docker run --rm -d \
+sudo docker rm stage-challenge || true
+sudo docker run --rm -d \
   -p 80:80 \
   -p 2222:22 \
   --restart always \
