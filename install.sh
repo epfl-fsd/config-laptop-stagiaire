@@ -5,7 +5,7 @@
 # - wget -O - https://raw.githubusercontent.com/epfl-fsd/config-laptop-stagiaire/main/install.sh | bash
 # Note: use $(cat /proc/sys/kernel/random/uuid | cut -d'-' -f1) to bypass GitHub cache
 
-# Ensure script ran as root
+# Ensure script is ran as root
 if [ "$EUID" -ne 0 ]; then
   echo "This script must be run as root"
   exit 1
@@ -17,11 +17,11 @@ CLS_NEW_PASSWORD=${CLS_NEW_PASSWORD:-"superpassword"} # 8 chars min
 
 echo "Installation script for trainee latptop"
 
+################################################################################
+# Initial setup
+################################################################################
 # Update everything
-apt update && apt upgrade -y
-
-# Ensure Wifi is on eduroam
-nmcli d wifi connect eduroam
+apt update -qq && apt upgrade -y -qq
 
 # Codium archive repo
 wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg \
@@ -31,10 +31,10 @@ echo -e 'Types: deb\nURIs: https://download.vscodium.com/debs\nSuites: vscodium\
   | tee /etc/apt/sources.list.d/vscodium.sources
 
 # Re-update for new repos
-apt update
+apt update -qq
 
 # Install usefull tools
-apt install -y \
+apt install -y -qq \
   bash-completion \
   codium \
   ca-certificates \
@@ -49,15 +49,24 @@ apt install -y \
   zsh;
 
 # Remove the "Welcome to Ubuntu"
-apt remove \
+apt remove -qq \
   gnome-initial-setup;
 
+# Ensure Wifi is on eduroam
+nmcli d wifi connect eduroam
+
+################################################################################
+# SSH management
+################################################################################
 # Enable SSH
 systemctl enable ssh --now
 
 # Add some SSH user
 ssh-import-id gh:ponsfrilus gh:lvenries gh:evinne8 gh:antoinefabr
 
+################################################################################
+# Docker installation and configuration
+################################################################################
 # Install Docker (https://docs.docker.com/engine/install/ubuntu/)
 if docker ps >/dev/null 2>&1; then
   echo "Docker seems to be already running fine"
@@ -70,6 +79,9 @@ fi
 groupadd docker 2>/dev/null || true
 usermod -aG docker administrator
 
+################################################################################
+# "Stage" user management
+################################################################################
 # Add a new user
 if ! id "$CLS_NEW_USER" &>/dev/null; then
   useradd -m -s /bin/bash "$CLS_NEW_USER"
@@ -85,6 +97,9 @@ usermod -aG docker "$CLS_NEW_USER"
 sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' /etc/gdm3/custom.conf
 sed -i "s/^.*AutomaticLogin = .*/AutomaticLogin = $CLS_NEW_USER/" /etc/gdm3/custom.conf
 
+################################################################################
+# Stage challenge
+################################################################################
 # Check if stage-challenge host exist, else append entry
 grep -q "stage-challenge.epfl.ch" /etc/hosts || \
 sed -i "s/^127.0.0.1.*/& stage-challenge.epfl.ch/" /etc/hosts
@@ -99,6 +114,9 @@ docker run -d \
   --name stage-challenge \
   ghcr.io/lvenries/stage_challenge:1.0.0
 
+################################################################################
+# Auto start
+################################################################################
 # Auto-launch Firefox tabs on stage session
 CLS_USER_HOME=$(eval echo ~$CLS_NEW_USER)
 mkdir -p "$CLS_USER_HOME/.config/autostart"
