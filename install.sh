@@ -45,13 +45,15 @@ apt install -y \
   tmux \
   vim \
   vlc \
-  zsh
+  zsh;
 
-# Install Docker
-# See https://docs.docker.com/engine/install/ubuntu/
-# TODO: do not install Docker if `docker` is already working
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh ./get-docker.sh
+# Install Docker (https://docs.docker.com/engine/install/ubuntu/)
+if docker ps >/dev/null 2>&1; then
+  echo "Docker seems to be already running fine"
+else
+  curl -fsSL https://get.docker.com -o get-docker.sh
+  sh ./get-docker.sh
+fi
 
 # Docker post-install (https://docs.docker.com/engine/install/linux-postinstall/)
 groupadd docker 2>/dev/null || true
