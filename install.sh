@@ -74,9 +74,14 @@ usermod -aG docker administrator
 if ! id "$NEW_USER" &>/dev/null; then
   useradd -m -s /bin/bash "$NEW_USER"
 fi
+# Change its password
 echo "$NEW_USER:$NEW_PASSWORD" | chpasswd
+# Change its shell
+usermod -s /bin/bash "$NEW_USER"
+# Add it to the docker group
 usermod -aG docker "$NEW_USER"
 
+# Set automatic login to the new user
 sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' /etc/gdm3/custom.conf
 sed -i "s/^.*AutomaticLogin = .*/AutomaticLogin = $NEW_USER/" /etc/gdm3/custom.conf
 
