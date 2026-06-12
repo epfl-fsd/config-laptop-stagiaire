@@ -11,59 +11,7 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# User account data
-CLS_NEW_USER=${CLS_NEW_USER:-"stage"}
-CLS_NEW_PASSWORD=${CLS_NEW_PASSWORD:-"superpassword"} # 8 chars min
-CLS_USER_HOME=$(eval echo ~$CLS_NEW_USER)
-
 echo "Installation script for trainee latptop"
-
-################################################################################
-# Initial setup
-################################################################################
-# Update everything
-apt update -qq && apt upgrade -y -qq
-
-# Codium archive repo
-wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg \
-  | gpg --dearmor \
-  | dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
-echo -e 'Types: deb\nURIs: https://download.vscodium.com/debs\nSuites: vscodium\nComponents: main\nArchitectures: amd64 arm64\nSigned-by: /usr/share/keyrings/vscodium-archive-keyring.gpg' \
-  | tee /etc/apt/sources.list.d/vscodium.sources
-
-# Re-update for new repos
-apt update -qq
-
-# Install usefull tools
-apt install -y -qq \
-  bash-completion \
-  codium \
-  ca-certificates \
-  curl \
-  git \
-  iputils-ping \
-  openssh-server \
-  sl \
-  tmux \
-  vim \
-  vlc \
-  zsh;
-
-# Remove the "Welcome to Ubuntu"
-apt remove -qq \
-  gnome-initial-setup;
-
-# Ensure Wifi is on eduroam
-nmcli d wifi connect eduroam
-
-################################################################################
-# SSH management
-################################################################################
-# Enable SSH
-systemctl enable ssh --now
-
-# Add some SSH user
-ssh-import-id gh:ponsfrilus gh:lvenries gh:evinne8 gh:antoinefabr
 
 ################################################################################
 # Docker installation and configuration
@@ -81,29 +29,11 @@ groupadd docker 2>/dev/null || true
 usermod -aG docker administrator
 
 ################################################################################
-# "Stage" user management
-################################################################################
-# Add a new user
-if ! id "$CLS_NEW_USER" &>/dev/null; then
-  useradd -m -s /bin/bash "$CLS_NEW_USER"
-fi
-# Change its password
-echo "$CLS_NEW_USER:$CLS_NEW_PASSWORD" | chpasswd
-# Change its shell
-usermod -s /bin/bash "$CLS_NEW_USER"
-# Add it to the docker group
-usermod -aG docker "$CLS_NEW_USER"
-
-# Set automatic login to the new user
-sed -i 's/^.*AutomaticLoginEnable = .*/AutomaticLoginEnable = true/' /etc/gdm3/custom.conf
-sed -i "s/^.*AutomaticLogin = .*/AutomaticLogin = $CLS_NEW_USER/" /etc/gdm3/custom.conf
-
-################################################################################
 # Stage challenge
 ################################################################################
 # Check if stage-challenge host exist, else append entry
-grep -q "stage-challenge.epfl.ch" /etc/hosts || \
-sed -i "s/^127.0.0.1.*/& stage-challenge.epfl.ch/" /etc/hosts
+grep -q "stage-challenge.fsd.epfl.ch" /etc/hosts || \
+sed -i "s/^127.0.0.1.*/& stage-challenge.fsd.epfl.ch/" /etc/hosts
 
 # Ensure the challenge is running
 # See https://github.com/lvenries/stage_challenge
@@ -113,35 +43,7 @@ docker run -d \
   -p 2222:22 \
   --restart always \
   --name stage-challenge \
-  ghcr.io/lvenries/stage_challenge:1.0.0
-
-################################################################################
-# Auto start
-################################################################################
-# Auto-launch Firefox tabs on stage session
-mkdir -p "$CLS_USER_HOME/.config/autostart"
-cat > "$CLS_USER_HOME/.config/autostart/firefox-tabs.desktop" <<EOF
-[Desktop Entry]
-Type=Application
-Exec=bash -c "sleep 8 && firefox --new-window http://stage-challenge.epfl.ch --new-tab https://www.epfl.ch"
-Hidden=false
-NoDisplay=true
-X-GNOME-Autostart-enabled=true
-Name=Firefox Tabs
-EOF
-chown -R $CLS_NEW_USER:$CLS_NEW_USER "$CLS_USER_HOME/.config"
-
-################################################################################
-# Background management
-################################################################################
-# https://unsplash.com/photos/gray-concrete-building-near-green-grass-field-during-daytime-TkNFQiuZJ4Q
-wget -O ${CLS_USER_HOME}/Pictures/med01.jpg https://unsplash.com/photos/TkNFQiuZJ4Q/download
-# https://unsplash.com/photos/a-building-with-windows-jL78MPkwN3M
-wget -O ${CLS_USER_HOME}/Pictures/med02.jpg https://unsplash.com/photos/jL78MPkwN3M/download
-
-RAND=$(printf "%02d" $((RANDOM % 2 + 1)))
-sudo -u ${CLS_NEW_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CLS_NEW_USER})/bus" \
-gsettings set org.gnome.desktop.background picture-uri "file://${CLS_USER_HOME}/Pictures/med${RAND}.jpg"
+  ghcr.io/dwesh163/stage_challenge:1.1.0
 
 ################################################################################
 # Ask to reboot the machine
